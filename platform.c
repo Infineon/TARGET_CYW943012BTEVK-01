@@ -43,6 +43,10 @@
 #include "wiced_bt_app_hal_common.h"
 #include "wiced_rtos.h"
 
+#ifndef PLATFORM_REMOTE_HOST_NVRAM_SUPPORT
+#define PLATFORM_REMOTE_HOST_NVRAM_SUPPORT  0
+#endif
+
 #define REG32(address)  ( *(volatile UINT32*)(address) )
 
 #define cr_pad_config_adr0                             0x00320068
@@ -451,6 +455,7 @@ uint16_t wiced_platform_nvram_read(uint16_t vs_id, uint16_t data_length, uint8_t
  */
 uint16_t wiced_platform_nvram_write(uint16_t vs_id, uint16_t data_length, uint8_t *p_data, wiced_result_t *p_status)
 {
+#if (PLATFORM_REMOTE_HOST_NVRAM_SUPPORT)
     platform_virtual_nvram_t *p_index = NULL;
     wiced_bool_t update = WICED_FALSE;
 
@@ -547,6 +552,11 @@ uint16_t wiced_platform_nvram_write(uint16_t vs_id, uint16_t data_length, uint8_
 
     *p_status = WICED_SUCCESS;
     return p_index->data_length;
+
+#else
+    *p_status = WICED_ERROR;
+    return 0;
+#endif
 }
 
 /**
