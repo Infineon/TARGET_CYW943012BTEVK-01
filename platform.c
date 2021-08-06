@@ -379,6 +379,131 @@ void wiced_platform_init(void)
     platform_mem_init();
 }
 
+/*
+ * platform_transport_status_handler
+ */
+static void platform_transport_status_handler( wiced_transport_type_t type )
+{
+    wiced_transport_send_data(HCI_CONTROL_EVENT_DEVICE_STARTED, NULL, 0);
+}
+
+static void platform_transport_rx_data_handler_push_nvram_data(uint8_t *p_data, uint32_t data_len)
+{
+    uint16_t vs_id;
+    uint32_t payload_len;
+    platform_virtual_nvram_t *p_new;
+    wiced_result_t status;
+
+    /* Check parameter. */
+    if ((p_data == NULL) ||
+        (data_len == 0))
+    {
+        return;
+    }
+
+    /* Parse information. */
+    STREAM_TO_UINT16(vs_id, p_data);
+    payload_len = data_len - sizeof(vs_id);
+
+    wiced_platform_nvram_write(vs_id, payload_len, p_data, &status);
+    (void) status;
+}
+
+/*
+ * platform_transport_rx_data_handler
+ */
+static uint32_t platform_transport_rx_data_handler(uint8_t *p_buffer, uint32_t length)
+{
+    uint16_t opcode;
+    uint16_t payload_len;
+    uint8_t *p_data = p_buffer;
+    uint32_t sample_rate = 16000;
+    uint8_t wiced_hci_status = 1;
+    wiced_result_t status;
+    uint8_t param8;
+
+    /* Check parameter. */
+    if (p_buffer == NULL)
+    {
+        return HCI_CONTROL_STATUS_INVALID_ARGS;
+    }
+
+    // Expected minimum 4 byte as the wiced header
+    if (length < (sizeof(opcode) + sizeof(payload_len)))
+    {
+        wiced_transport_free_buffer(p_buffer);
+        return HCI_CONTROL_STATUS_INVALID_ARGS;
+    }
+
+    STREAM_TO_UINT16(opcode, p_data);       // Get OpCode
+    STREAM_TO_UINT16(payload_len, p_data);  // Gen Payload Length
+
+    switch(opcode)
+    {
+    case HCI_CONTROL_HCI_AUDIO_COMMAND_PUSH_NVRAM_DATA:
+        platform_transport_rx_data_handler_push_nvram_data(p_data, payload_len);
+        break;
+    default:
+        if (platform_cb.transport.p_app_rx_data_handler)
+        {
+            (*platform_cb.transport.p_app_rx_data_handler)(opcode, p_data, payload_len);
+        }
+        break;
+    }
+
+    // Freeing the buffer in which data is received
+    wiced_transport_free_buffer(p_buffer);
+
+    return HCI_CONTROL_STATUS_SUCCESS;
+}
+
+/**
+ * wiced_platform_transport_init
+ *
+ * Initialize the WICED HCI Transport interface.
+ *
+ * @param[in] p_rx_data_handler : user callback for incoming HCI data.
+ *
+ * @return  WICED_TRUE - success
+ *          WICED_FALSE - fail
+ */
+wiced_bool_t wiced_platform_transport_init(wiced_platform_transport_rx_data_handler *p_rx_data_handler)
+{
+    wiced_transport_cfg_t cfg = {
+                                    .type = WICED_TRANSPORT_UART,
+                                    .cfg.uart_cfg = {
+                                                        .mode = WICED_TRANSPORT_UART_HCI_MODE,
+                                                        .baud_rate = HCI_UART_DEFAULT_BAUD,
+                                                    },
+                                    .rx_buff_pool_cfg = {
+                                                            .buffer_size = 0,
+                                                            .buffer_count = 0,
+                                                        },
+                                    .p_status_handler = platform_transport_status_handler,
+                                    .p_data_handler = platform_transport_rx_data_handler,
+                                    .p_tx_complete_cback = NULL,
+                                };
+    wiced_result_t result;
+
+    if (platform_cb.transport.init)
+    {
+        return WICED_FALSE;
+    }
+
+    /* Initialize the transport. */
+    result = wiced_transport_init(&cfg);
+
+    if (result == WICED_BT_SUCCESS)
+    {
+        platform_cb.transport.init = WICED_TRUE;
+        platform_cb.transport.p_app_rx_data_handler = p_rx_data_handler;
+
+        return WICED_TRUE;
+    }
+
+    return WICED_FALSE;
+}
+
 /**
  * wiced_platform_nvram_read
  *
