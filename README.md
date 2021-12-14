@@ -2,11 +2,11 @@
 
 ### Overview
 
-The Infineon CYW943012BTEVK-01 Evaluation kit enables you to evaluate and develop Bluetooth applications using the CYW43012 (802.11n/802.11ac-Friendly Dual-Band Wi-Fi and Bluetooth Combo) The CYW43012 is a 28-nm, ultra-low power single-chip device with an integrated Bluetooth subsystem supporting LE/BR/EDR.  This kit helps evaluate device functionality and develop embedded Bluetooth applications quickly for faster time-to-market.
+The Infineon CYW943012BTEVK-01 Evaluation kit enables you to evaluate and develop Bluetooth&#174; applications using the CYW43012 (802.11n/802.11ac-Friendly Dual-Band Wi-Fi and Bluetooth&#174; Combo) The CYW43012 is a 28-nm, ultra-low power single-chip device with an integrated Bluetooth&#174; subsystem supporting LE/BR/EDR.  This kit helps evaluate device functionality and develop embedded Bluetooth&#174; applications quickly for faster time-to-market.
 
 ### Kit Features
 
-* CYW43012 single chip, Wi-Fi + Bluetooth Combo System on a Chip (SoC) that includes a baseband processor, an ARM® Cortex™-M4 processor, and integrated transceiver.
+* CYW43012 single chip, Wi-Fi + Bluetooth&#174; Combo System on a Chip (SoC) that includes a baseband processor, an Arm&#174; Cortex&#174;-M4 processor, and integrated transceiver.
 * Audio Arduino shield with on-board analog microphones, audio codec chip, headphone and speaker output
 * On-board sensors: an ambient light sensor, thermistor, and Infineon IM69D127 digital microphone
 * User switches and LEDs

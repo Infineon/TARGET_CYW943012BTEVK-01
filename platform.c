@@ -103,12 +103,13 @@ uint8_t platform_transport_started = 0;
 
 static void wiced_platform_debug_uart_init(void)
 {
+#if !USE_DESIGN_MODUS
     /* cr_pad_config_adr8 [31:24] = 0x60. Set input disable for BT_I2S_CLK */
     REG32(cr_pad_config_adr8) = (REG32(cr_pad_config_adr8) & 0x00ffffff) | (0x60 << 24);
 
     /* cr_pad_fcn_ctl_adr3 [15:12] = 0x2. Select BT_I2S_CLK to DEBUG_TXD */
     REG32(cr_pad_fcn_ctl_adr3) = (REG32(cr_pad_fcn_ctl_adr3) & 0xffff0fff) | (0x2 << 12);
-
+#endif // !USE_DESIGN_MODUS
 }
 
 /**
@@ -149,11 +150,58 @@ static void wiced_platform_warm_up_rbg200(void)
  *
  * Warm up the platform-specific modules
  */
-static void wiced_platform_warm_up(void)
+void wiced_platform_warm_up(void)
 {
     wiced_platform_warm_up_rbg200();
 }
 
+
+// _FillinFunctionInfo is available in patch, but the ROM replacement entry is not installed
+// we can call it directly here if we need to
+//  - note the code here only configures the pin, it does not unconfigure a previously configured pin
+typedef struct
+{
+    BOOL8 RetVal;
+    UINT8 shift;
+    UINT16 fcn;
+    UINT32 premux_adr;
+    UINT32 enable_adr;
+    UINT32 enable_value;
+    UINT32 enable_mask;
+    UINT32 pin_config;
+} function_config_info_t;
+
+void _FillinFunctionInfo(wiced_bt_gpio_numbers_t gpio, wiced_bt_gpio_function_t function, function_config_info_t* info);
+
+void wiced_hal_gpio_select_function_local(wiced_bt_gpio_numbers_t gpio, wiced_bt_gpio_function_t function)
+{
+    function_config_info_t info;
+    _FillinFunctionInfo(gpio, function, &info);
+
+    if (info.RetVal)
+    {
+        if (info.fcn)
+        {
+            REG32(iocfg_fcn_p0_adr + (4 * gpio)) = info.fcn;
+        }
+        if (info.premux_adr)
+        {
+            REG32(info.premux_adr) &= ~((0xff) << info.shift);
+            REG32(info.premux_adr) |= ((gpio + 1) << info.shift);
+        }
+        if (info.enable_adr)
+        {
+            if (info.enable_mask)
+            {
+                REG32(info.enable_adr) &= ~info.enable_mask;
+            }
+            REG32(info.enable_adr) |= info.enable_value;
+        }
+        REG32(iocfg_p0_adr + (4 * gpio)) = info.pin_config;
+    }
+}
+
+#if !USE_DESIGN_MODUS
 void wiced_platform_spi_init(void)
 {
     //P0 - nCS
@@ -213,6 +261,7 @@ static void wiced_platform_button_init(void)
 
     /* P13 as vol- button : No extra setting here */
 }
+#endif // USE_DESIGN_MODUS
 
 void i2c_init_m2base43012(void)
 {
@@ -350,6 +399,7 @@ void i2c_init_bitbang(void)
     REG32(cr_pad_fcn_ctl_adr0) = REG32(cr_pad_fcn_ctl_adr0) & 0xfff0ffff;
 }
 
+#if !USE_DESIGN_MODUS
 /**
  * wiced_platform_i2c_init
  *
@@ -378,6 +428,7 @@ void wiced_platform_init(void)
 
     platform_mem_init();
 }
+#endif // USE_DESIGN_MODUS
 
 /*
  * platform_transport_status_handler

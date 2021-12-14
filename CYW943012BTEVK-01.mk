@@ -38,7 +38,7 @@ endif
 #
 # Device definition
 #
-DEVICE=CYW43012C0WKWBG
+DEVICE=LBEE59B1LV
 CHIP=43012
 CHIP_REV=C0
 BLD=A
@@ -59,6 +59,18 @@ CY_BASELIB_PATH?=$(SEARCH_$(CY_TARGET_DEVICE))/COMPONENT_$(CY_TARGET_DEVICE)
 CY_BASELIB_CORE_PATH?=$(SEARCH_core-make)
 CY_INTERNAL_BASELIB_PATH?=$(patsubst %/,%,$(CY_BASELIB_PATH))
 override CY_DEVICESUPPORT_SEARCH_PATH:=$(call CY_MACRO_SEARCH,devicesupport.xml,$(CY_INTERNAL_BASELIB_PATH))
+endif
+
+# declare which stack version to use in COMPONENT folders
+COMPONENTS+=btstack_v1
+
+# temporary, use to build with or without new 43012 design.modus
+USE_DESIGN_MODUS=0
+ifeq ($(USE_DESIGN_MODUS),1)
+CY_CORE_DEFINES += -DUSE_DESIGN_MODUS=1
+else
+DISABLE_COMPONENTS += bsp_design_modus
+CY_CORE_DEFINES += -DUSE_DESIGN_MODUS=0
 endif
 
 #
@@ -85,7 +97,7 @@ CY_CORE_DEFINES+=-DHCI_UART_MAX_BAUD=3000000
 # default baud rate is 3M, that is the max supported on macOS
 CY_CORE_DEFINES+=-DHCI_UART_DEFAULT_BAUD=3000000
 # this platform does not expose PUART
-CY_CORE_DEFINES+=-DNO_PUART_SUPPORT
+CY_CORE_DEFINES+=-DNO_PUART_SUPPORT=1
 ifneq ($(KITPROG3_USE_1_STOP_BIT),1)
 # need to set 2 stop bits for KitProg3 at 3M baud rate
 CY_CORE_DEFINES+=-DKITPROG3_USE_2_STOP_BITS
@@ -96,11 +108,9 @@ CY_CORE_DEFINES+=-DSWITCH_PTU_CHECK
 #
 # TARGET swd interface setup
 #
-# TBD for this board
-ifeq ($(ENABLE_DEBUG),1)
-CY_CORE_DEFINES+=-DSWD_CLK=SWDCK_ON_P8
-CY_CORE_DEFINES+=-DSWD_IO=SWDIO_ON_P6
-endif
+CY_CORE_DEFINES+=-DCY_PLATFORM_SWDCK=WICED_P06
+CY_CORE_DEFINES+=-DCY_PLATFORM_SWDIO=WICED_P08
+
 
 #
 # Patch variables
