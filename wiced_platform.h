@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -96,6 +96,7 @@ typedef enum
     WICED_PLATFORM_BUTTON_MAX //!< Max button for error check
 } wiced_platform_button_number_t;
 
+#define WICED_PLATFORM_BUTTON_MAX_DEF     4   //define for platform_gpio_buttons
 
 //! Number of GPIO available on the platform.
 // Configurable via SuperMux
@@ -262,7 +263,7 @@ typedef enum
     WICED_PLATFORM_BUTTON_MAX //!< Max button for error check
 } wiced_platform_button_number_t;
 
-#define WICED_PLATFORM_BUTTON_MAX_DEF     4   //define for preprocessor
+#define WICED_PLATFORM_BUTTON_MAX_DEF     4   //define for platform_gpio_buttons
 
 #define HCI_UART_DEFAULT_BAUD   3000000   /* default baud rate is 3M, that is max supported baud rate on Mac OS */
 
@@ -312,6 +313,9 @@ void wiced_platform_spi_init(void);
  */
 void wiced_platform_i2c_init(void);
 
+/* @} */
+#endif
+
 /**
  * wiced_platform_transport_init
  *
@@ -323,9 +327,6 @@ void wiced_platform_i2c_init(void);
  *          WICED_FALSE - fail
  */
 wiced_bool_t wiced_platform_transport_init(wiced_platform_transport_rx_data_handler *p_rx_data_handler);
-
-/* @} */
-#endif
 
 /**
  * wiced_platform_set_ptu_fifo
@@ -358,3 +359,7 @@ extern uint8_t platform_transport_started;
 
 
 extern wiced_debug_uart_types_t wiced_debug_uart;
+
+/* utility functions */
+uint32_t wiced_platform_get_button_pressed_value(wiced_platform_button_number_t button);
+void     wiced_platform_register_button_callback(wiced_platform_button_number_t button, void (*userfn)(void*, uint8_t), void* userdata, wiced_platform_button_interrupt_edge_t trigger_edge);

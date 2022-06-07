@@ -6,7 +6,7 @@ The Infineon CYW943012BTEVK-01 Evaluation kit enables you to evaluate and develo
 
 ### Kit Features
 
-* CYW43012 single chip, Wi-Fi + Bluetooth&#174; Combo System on a Chip (SoC) that includes a baseband processor, an Arm&#174; Cortex&#174;-M4 processor, and integrated transceiver.
+* CYW43012 single chip, Wi-Fi + Bluetooth&#174; Combo system on chip that includes a baseband processor, an Arm&#174; Cortex&#174;-M4 processor, and integrated transceiver.
 * Audio Arduino shield with on-board analog microphones, audio codec chip, headphone and speaker output
 * On-board sensors: an ambient light sensor, thermistor, and Infineon IM69D127 digital microphone
 * User switches and LEDs
@@ -22,4 +22,6 @@ The Infineon CYW943012BTEVK-01 Evaluation kit enables you to evaluate and develo
 
 ### Additional Information
 
-Max UART baud rate is 3M.
+* Max UART baud rate is 3M.
+* Pins P5, P6, and P7 cannot be multiplexed with peripherals. They may be used as simple GPIO only, per the CYW43012 data sheet.
+* Pin P8 may be used as an output only, per the CYW43012 data sheet.

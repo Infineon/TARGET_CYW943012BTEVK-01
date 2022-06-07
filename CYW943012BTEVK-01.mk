@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+# Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
 # an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 #
 # This software, including source code, documentation and related
@@ -65,12 +65,14 @@ endif
 COMPONENTS+=btstack_v1
 
 # temporary, use to build with or without new 43012 design.modus
-USE_DESIGN_MODUS=0
+USE_DESIGN_MODUS=1
 ifeq ($(USE_DESIGN_MODUS),1)
 CY_CORE_DEFINES += -DUSE_DESIGN_MODUS=1
 else
 DISABLE_COMPONENTS += bsp_design_modus
 CY_CORE_DEFINES += -DUSE_DESIGN_MODUS=0
+# this platform does not expose PUART
+CY_CORE_DEFINES+=-DNO_PUART_SUPPORT=1
 endif
 
 #
@@ -96,8 +98,6 @@ PLATFORM_DIRECT_LOAD_BASE_ADDR = 0x238000
 CY_CORE_DEFINES+=-DHCI_UART_MAX_BAUD=3000000
 # default baud rate is 3M, that is the max supported on macOS
 CY_CORE_DEFINES+=-DHCI_UART_DEFAULT_BAUD=3000000
-# this platform does not expose PUART
-CY_CORE_DEFINES+=-DNO_PUART_SUPPORT=1
 ifneq ($(KITPROG3_USE_1_STOP_BIT),1)
 # need to set 2 stop bits for KitProg3 at 3M baud rate
 CY_CORE_DEFINES+=-DKITPROG3_USE_2_STOP_BITS
